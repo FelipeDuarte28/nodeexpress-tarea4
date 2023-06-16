@@ -1,23 +1,65 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Form from "./components/Form";
+import Post from "./components/Post";
+import { useState } from "react";
+import axios from "axios";
+import { useEffect } from "react";
+
+const urlBaseServer = "http://localhost:3000";
 
 function App() {
+  const [titulo, setTitulo] = useState("");
+  const [imgSrc, setImgSrc] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [posts, setPosts] = useState([]);
+
+  const getPosts = async () => {
+    const { data: posts } = await axios.get(urlBaseServer + "/posts");
+    setPosts([...posts]);
+  };
+
+  const agregarPost = async () => {
+    const post = {
+      titulo: titulo,
+      img: imgSrc,
+      descripcion: descripcion
+    };
+    await axios.post(urlBaseServer + "/posts", post);
+    getPosts();
+  };
+
+  const like = async (id) => {
+    await axios.put(urlBaseServer + `/posts/like/${id}`);
+    getPosts();
+  };
+
+  const eliminarPost = async (id) => {
+    await axios.delete(urlBaseServer + `/posts/${id}`);
+    getPosts();
+  };
+
+  useEffect(() => {
+    getPosts();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h2 className="py-5 text-center">&#128248; Like Me &#128248;</h2>
+      <div className="row m-auto px-5">
+        <div className="col-12 col-sm-4">
+          <Form
+            setTitulo={setTitulo}
+            setImgSrc={setImgSrc}
+            setDescripcion={setDescripcion}
+            agregarPost={agregarPost}
+          />
+        </div>
+        <div className="col-12 col-sm-8 px-5 row posts align-items-start">
+          {posts.map((post, i) => (
+            <Post key={i} post={post} like={like} eliminarPost={eliminarPost} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
