@@ -4,21 +4,21 @@ function Form({ setTitulo, setImgSrc, setDescripcion, agregarPost }) {
       <div className="mb-2">
         <h6>Agregar post</h6>
         <label>Título</label>
-        <input
+        <input required
           onChange={(event) => setTitulo(event.target.value)}
           className="form-control"
         />
       </div>
       <div className="mb-2">
         <label>URL de la imagen</label>
-        <input
+        <input required
           onChange={(event) => setImgSrc(event.target.value)}
           className="form-control"
         />
       </div>
       <div className="mb-3">
         <label>Descripción</label> <br />
-        <textarea
+        <textarea required
           onChange={(event) => setDescripcion(event.target.value)}
           className="form-control"
         ></textarea>

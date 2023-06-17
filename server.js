@@ -18,19 +18,52 @@ const pool = new Pool({
     allowExitOnIdle: true,
 });
 
+////// GET: obtener los registros de los posts
 app.get('/posts', async (req, res) => {
-    const result = await pool.query('SELECT * FROM posts');
-    const posts = result.rows;
-    res.json(posts);
+    try {
+        const result = await pool.query('SELECT * FROM posts');
+        const posts = result.rows;
+        res.json(posts);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
 
+////// POST: agrega nuevo registro
 app.post('/posts', async (req, res) => {
-    const { titulo, img, descripcion, likes } = req.body;
-    await pool.query(
-        'INSERT INTO posts (titulo, img, descripcion, likes) VALUES ($1, $2, $3, $4)',
-        [titulo, img, descripcion, likes]
-    );
-    res.send("Agregado.");
+    const { titulo, img, descripcion } = req.body;
+    if (!titulo || !img || !descripcion) {
+        res.status(400).send('Hay campos vacíos.');
+        return;
+    }
+    try {
+        const result = await pool.query('INSERT INTO posts (titulo, img, descripcion, likes) VALUES ($1, $2, $3, 0)', [titulo, img, descripcion]);
+        res.send("Agregado.");
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+////// PUT: para likes
+app.put('/posts/like/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query('UPDATE posts SET likes = likes + 1 WHERE id = $1', [id]);
+        res.send("Like entregado");
+    } catch ({ code, message }) {
+        res.status(code).send(message);
+    }
+});
+
+////// DELETE: elimina posts
+app.delete('/posts/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query('DELETE FROM posts WHERE id = $1', [id]);
+        res.send("Post eliminado.");
+    } catch ({ code, message }) {
+        res.status(code).send(message);
+    }
 });
 
 // Configuración para abrir la aplicación de React, ejecutar npm run build antes de ejecutar node server.js
